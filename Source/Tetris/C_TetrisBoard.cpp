@@ -20,6 +20,8 @@ AC_TetrisBoard::AC_TetrisBoard()
 void AC_TetrisBoard::BeginPlay() 
 {
 	Super::BeginPlay();
+	level = 1;
+	dropSpeed = 0.7f;
 	world = GetWorld();
 	EnableInput(world->GetFirstPlayerController());
 	UInputComponent* myInputComp = this->InputComponent;
@@ -58,7 +60,7 @@ void AC_TetrisBoard::SpawnTetromino()
 		currentTetromino->SetActorLocation(spawnLocation);
 		currentTetromino->Rotate();
 		SpawnPreviewTetromino();
-		world->GetTimerManager().SetTimer(dropTimerHandle, this, &AC_TetrisBoard::DropTetromino, 0.2f, true);
+		world->GetTimerManager().SetTimer(dropTimerHandle, this, &AC_TetrisBoard::MoveTetrominoDown, dropSpeed, true);
 	}
 }
 
@@ -75,19 +77,19 @@ void AC_TetrisBoard::TetrominoFinalise()
 	currentTetromino->Destroy();
 	points += ClearLines();
 	highScore->GetTextRender()->SetText(FText::AsNumber(points));
+	LevelUp();
 	SpawnTetromino();
-	world->GetTimerManager().UnPauseTimer(dropTimerHandle);
 }
 
-void AC_TetrisBoard::DropTetromino()
+void AC_TetrisBoard::LevelUp()
 {
-	if (currentTetromino->Move(0, 1) == false)
+	if (points > (level * (700 + 100 * level)))
 	{
-		world->GetTimerManager().PauseTimer(dropTimerHandle);
-		world->GetTimerManager().SetTimer(finaliseTimerHandle, this, &AC_TetrisBoard::TetrominoFinalise, 1.0f, false);
+		level += 1;
+		if (dropSpeed > 0.1)
+			dropSpeed = dropSpeed * (0.8);
 	}
 }
-
 int AC_TetrisBoard::ClearLines()
 {
 	int cleared = -1;
@@ -136,10 +138,30 @@ bool AC_TetrisBoard::CheckPositions(TArray<int> positionsToCheck)
 {
 	for(int i = 0; i <4;++i)
 	{
-		if (placedBooleans[i * 2][i * 2 + 1] == true)
-			return true;
+		int col = positionsToCheck[i * 2];
+		int row = positionsToCheck[i * 2 + 1];
+		if (placedBooleans[col][row] == true || col < 0 || col > 9 || row > 14) 
+			return false;
 	}
-	return false;
+	return true;
+}
+
+void AC_TetrisBoard::MoveTetrominoDown()
+{
+	if (currentTetromino->Move(0, 1) == false)
+	{
+		world->GetTimerManager().PauseTimer(dropTimerHandle);
+		world->GetTimerManager().SetTimer(finaliseTimerHandle, this, &AC_TetrisBoard::TetrominoFinalise, dropSpeed, false);
+	}
+}
+
+void AC_TetrisBoard::DropTetromino()
+{
+	while (currentTetromino->Move(0, 1) == true)
+	{
+	};
+	world->GetTimerManager().PauseTimer(dropTimerHandle);
+	world->GetTimerManager().SetTimer(finaliseTimerHandle, this, &AC_TetrisBoard::TetrominoFinalise, dropSpeed, false);
 }
 
 void AC_TetrisBoard::MoveTetrominoRight()
@@ -174,6 +196,7 @@ void AC_TetrisBoard::SetupMyPlayerInputComponent(UInputComponent* myInputCompone
 	myInputComponent->BindAction("LeftMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoLeft);
 	myInputComponent->BindAction("RightMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoRight);
 	myInputComponent->BindAction("Rotate", IE_Pressed, this, &AC_TetrisBoard::RotateTetromino);
+	myInputComponent->BindAction("Drop", IE_Pressed, this, &AC_TetrisBoard::DropTetromino);
 };
 
 // Called every frame

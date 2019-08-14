@@ -49,11 +49,15 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+private:
 	virtual void SpawnTetromino();
-	virtual void DropTetromino();
+	virtual void MoveTetrominoDown();
 	virtual void SpawnPreviewTetromino();
-
-
+	virtual void DropTetromino();
+	virtual void LevelUp();
+	int level;
+	float dropSpeed;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

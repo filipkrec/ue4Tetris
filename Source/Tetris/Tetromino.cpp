@@ -65,6 +65,18 @@ void ATetromino::Rotate()
 	}
 	SetBlocks();
 }
+
+TArray<int> ATetromino::GetBlockPositions()
+{
+	TArray<int> blockPositions;
+	for (int i = 0; i < 4; ++i)
+	{
+		blockPositions.Add(currentColumn + blocks[i]->GetColumnDifference());
+		blockPositions.Add(currentRow + blocks[i]->GetRowDifference());
+	}
+	return blockPositions;
+}
+
 bool ATetromino::SetBlockDifferences(TArray<int> newBlockPositions)
 {
 	if (CheckBlocks(newBlockPositions)) {
@@ -79,6 +91,17 @@ bool ATetromino::SetBlockDifferences(TArray<int> newBlockPositions)
 	else rotation -= 1;
 
 	return false;
+}
+
+bool ATetromino::CheckBlocksMove(int columnsToMove, int rowsToMove)
+{
+	TArray<int> positions = GetBlockPositions();
+	for (int i = 0; i < 4; ++i)
+	{
+		positions[i * 2] += columnsToMove;
+		positions[i * 2 + 1] += rowsToMove;
+	}
+	return board->CheckPositions(positions);
 }
 
 bool ATetromino::CheckBlocks(TArray<int> positionDifferences)
@@ -111,17 +134,6 @@ bool ATetromino::Move(int columnsToMove, int rowsToMove)
 	return false;
 }
 
-bool ATetromino::CheckBlocksMove(int columnsToMove, int rowsToMove)
-{
-	TArray<int> positions = GetBlockPositions();
-	for (int i = 0; i < 4; ++i)
-	{
-		positions[i * 2] += columnsToMove;
-		positions[i * 2 + 1] += rowsToMove;
-	}
-	return CheckBlocks(positions);
-}
-
 void ATetromino::SetBlocks()
 {
 	for (int i = 0; i < 4; ++i) {
@@ -146,6 +158,7 @@ void ATetromino::GenerateL()
 		differences = { 1,2,0,2,0,1,0,0 };
 	else if (rotation == 4)
 		differences = {0, 1, 0, 0, 1, 0, 2, 0 };
+	SetBlockDifferences(differences);
 
 
 }
@@ -219,17 +232,6 @@ ATetromino::ATetromino(const FObjectInitializer& ObjectInitializer) : Super(Obje
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	SetRootComponent(BaseMesh);
 }
-
- TArray<int> ATetromino::GetBlockPositions()
- {
-	 TArray<int> blockPositions;
-	 for (int i = 0; i < 4; ++i)
-	 {
-		 blockPositions.Add(currentColumn + blocks[i]->GetColumnDifference());
-		 blockPositions.Add(currentRow + blocks[i]->GetRowDifference());
-	 }
-	 return blockPositions;
- }
 
 void ATetromino::SetPosition(int column, int row) {
 	currentColumn = column;
