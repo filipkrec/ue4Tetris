@@ -56,8 +56,4 @@ public:
 	ATetromino(const FObjectInitializer& ObjectInitializer);
 	UPROPERTY(VisibleAnywhere, Category = "Mesh") 
 		UStaticMeshComponent* BaseMesh;
-
-	UPROPERTY(VisibleAnywhere, Category = "Material")
-		UMaterialInstanceDynamic* DynamicMaterialInst;
-
 };

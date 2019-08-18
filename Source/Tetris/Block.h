@@ -12,6 +12,7 @@ class TETRIS_API ABlock : public AActor
 	GENERATED_BODY()
 	
 public:	
+	enum BlockColor { yellow = 1, blue = 2, purple = 3, red = 4, orange = 5, green = 6, darkBlue = 7 };
 	// Sets default values for this actor's properties
 	ABlock();
 	//initializes object mesh
@@ -24,9 +25,13 @@ public:
 	virtual int GetColumnDifference();
 	virtual int GetRowDifference();
 	virtual void MoveDown();
+	virtual void SetColor(int i);
 
 	UPROPERTY(EditAnywhere, Category = "Mesh") 
 		UStaticMeshComponent* BaseMesh;
+
+	UPROPERTY(VisibleAnywhere, Category = "Material")
+		UMaterialInstanceDynamic* DynamicMaterialInst;
 
 private:
 	int columnDifference;

@@ -7,8 +7,12 @@
 #include "Block.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
 #include "TimerManager.h" 
+#include "Save.h"
+#include "PlayerSave.h"
+#include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/Engine/Classes/Components/InputComponent.h"
+#define LOCTEXT_NAMESPACE "TextNamespace"
 // Sets default values
 AC_TetrisBoard::AC_TetrisBoard()
 {
@@ -20,6 +24,7 @@ AC_TetrisBoard::AC_TetrisBoard()
 void AC_TetrisBoard::BeginPlay() 
 {
 	Super::BeginPlay();
+	paused = false;
 	level = 1;
 	dropSpeed = 0.7f;
 	world = GetWorld();
@@ -31,6 +36,43 @@ void AC_TetrisBoard::BeginPlay()
 	}
 	SpawnPreviewTetromino();
 	SpawnTetromino();
+}
+
+void AC_TetrisBoard::EndGame()
+{
+	world->GetTimerManager().ClearTimer(dropTimerHandle);
+	world->GetTimerManager().ClearTimer(finaliseTimerHandle);
+	world->GetTimerManager().ClearTimer(prolongTimerHandle);
+	TMap<FString, int> HighScores;
+	FString playerName;
+
+	if (UGameplayStatics::DoesSaveGameExist("Player", 0)) {
+		UPlayerSave* LoadGameInstancePlayer = Cast<UPlayerSave>(UGameplayStatics::CreateSaveGameObject(USave::StaticClass()));
+		LoadGameInstancePlayer = Cast<UPlayerSave>(UGameplayStatics::LoadGameFromSlot("Player", 0));
+		playerName = LoadGameInstancePlayer->playerName;
+	}
+	else playerName = "AAA";
+
+	if (UGameplayStatics::DoesSaveGameExist("Save", 0)) {
+		USave* LoadGameInstance = Cast<USave>(UGameplayStatics::CreateSaveGameObject(USave::StaticClass()));
+		LoadGameInstance = Cast<USave>(UGameplayStatics::LoadGameFromSlot("Save", 0));
+		HighScores = LoadGameInstance->HighScores;
+	}
+	int* oldScore = HighScores.Find(playerName);
+	if (oldScore != nullptr)
+	{
+		if (*oldScore < points)
+			HighScores.Add(playerName, points);
+
+	}
+	else
+		HighScores.Add(playerName, points);
+
+	USave* SaveGameInstance = Cast<USave>(UGameplayStatics::CreateSaveGameObject(USave::StaticClass()));
+	SaveGameInstance->HighScores = HighScores;
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Save", 0);
+
+	screenText->GetTextRender()->SetText(FText::Format(LOCTEXT("txt","GAME OVER! Score: {0}\nPress \"E\" to Exit or \"R\" to Restart"), points));
 }
 
 void AC_TetrisBoard::SpawnPreviewTetromino()
@@ -68,17 +110,26 @@ void AC_TetrisBoard::SpawnTetromino()
 void AC_TetrisBoard::TetrominoFinalise()
 {
 	TArray<int> positions = currentTetromino->GetBlockPositions();
-	TArray<ABlock*> blocks = currentTetromino->GetBlocks();
+    isOver = false;
 	for (int i = 0; i < 4; ++i)
 	{
-		placedPieces[positions[i * 2]][positions[i * 2 + 1]] = blocks[i];
-		placedBooleans[positions[i * 2]][positions[i * 2 + 1]]= true;
+		if (positions[i * 2 + 1] == 0)
+			isOver = true;
 	}
-	currentTetromino->Destroy();
-	points += ClearLines();
-	highScore->GetTextRender()->SetText(FText::AsNumber(points));
-	LevelUp();
-	SpawnTetromino();
+	if (isOver == false) {
+		TArray<ABlock*> blocks = currentTetromino->GetBlocks();
+		for (int i = 0; i < 4; ++i)
+		{
+			placedPieces[positions[i * 2]][positions[i * 2 + 1]] = blocks[i];
+			placedBooleans[positions[i * 2]][positions[i * 2 + 1]] = true;
+		}
+		currentTetromino->Destroy();
+		points += ClearLines();
+		highScore->GetTextRender()->SetText(FText::AsNumber(points));
+		LevelUp();
+		SpawnTetromino();
+	}
+	else EndGame();
 }
 
 void AC_TetrisBoard::LevelUp()
@@ -191,12 +242,47 @@ void AC_TetrisBoard::ProlongTimer()
 	world->GetTimerManager().UnPauseTimer(dropTimerHandle);
 }
 
+
+void AC_TetrisBoard::Restart()
+{
+	if(isOver == true)
+	UGameplayStatics::OpenLevel(this, FName(*world->GetName()), true);
+}
+
+
+void AC_TetrisBoard::Exit()
+{
+	if(isOver == true)
+	UGameplayStatics::OpenLevel(this, "MainMenu", true);
+}
+
+void AC_TetrisBoard::Pause()
+{
+	if (paused == false) {
+		world->GetTimerManager().PauseTimer(dropTimerHandle);
+		world->GetTimerManager().PauseTimer(finaliseTimerHandle);
+		world->GetTimerManager().PauseTimer(prolongTimerHandle);
+		screenText->GetTextRender()->SetText(FText::Format(LOCTEXT("txt2", "PAUSED\nLEVEL:{0}"), level));
+		paused = true;
+	}
+	else {
+		world->GetTimerManager().UnPauseTimer(dropTimerHandle);
+		world->GetTimerManager().UnPauseTimer(finaliseTimerHandle);
+		world->GetTimerManager().UnPauseTimer(prolongTimerHandle);
+		screenText->GetTextRender()->SetText("");
+		paused = false;
+	}
+}
+
 void AC_TetrisBoard::SetupMyPlayerInputComponent(UInputComponent* myInputComponent)
 {
 	myInputComponent->BindAction("LeftMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoLeft);
 	myInputComponent->BindAction("RightMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoRight);
 	myInputComponent->BindAction("Rotate", IE_Pressed, this, &AC_TetrisBoard::RotateTetromino);
 	myInputComponent->BindAction("Drop", IE_Pressed, this, &AC_TetrisBoard::DropTetromino);
+	myInputComponent->BindAction("Restart", IE_Pressed, this, &AC_TetrisBoard::Restart);
+	myInputComponent->BindAction("Escape", IE_Pressed, this, &AC_TetrisBoard::Exit);
+	myInputComponent->BindAction("Pause", IE_Pressed, this, &AC_TetrisBoard::Pause);
 };
 
 // Called every frame

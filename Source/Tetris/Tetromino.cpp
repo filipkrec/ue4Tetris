@@ -31,6 +31,7 @@ void ATetromino::GenerateTetromino()
 	TSubclassOf<class ABlock> ToSpawn;
 	for (int i = 0; i < 4; ++i) {
 		blocks[i] = world->SpawnActor<ABlock>(ABlock::StaticClass(), GetActorLocation(), rotator, params);
+		blocks[i]->SetColor(static_cast<int>(type));
 	}
 }
 
