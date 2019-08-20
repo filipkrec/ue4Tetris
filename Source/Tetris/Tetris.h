@@ -7,3 +7,9 @@
 #include "PlayerSave.h"
 #include "Kismet/GameplayStatics.h"
 
+class FTetris : public FDefaultGameModuleImpl
+{
+public:
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+};

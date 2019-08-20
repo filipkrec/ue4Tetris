@@ -3,4 +3,21 @@
 #include "Tetris.h"
 #include "Modules/ModuleManager.h"
 
-IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Tetris, "Tetris" );
+#include "Internationalization/StringTableRegistry.h"
+#include "Paths.h"
+
+
+void FTetris::StartupModule()
+{
+	FDefaultGameModuleImpl::StartupModule();
+	FStringTableRegistry::Get().UnregisterStringTable("StringTableCSV");
+	LOCTABLE_FROMFILE_GAME("StringTableCSV", "Namespace", "Code/StringTable.csv");
+}
+
+
+void FTetris::ShutdownModule()
+{
+	FDefaultGameModuleImpl::ShutdownModule();
+}
+
+IMPLEMENT_PRIMARY_GAME_MODULE(FTetris, Tetris, "Tetris");

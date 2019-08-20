@@ -12,7 +12,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/Engine/Classes/Components/InputComponent.h"
-#define LOCTEXT_NAMESPACE "TextNamespace"
 // Sets default values
 AC_TetrisBoard::AC_TetrisBoard()
 {
@@ -72,7 +71,7 @@ void AC_TetrisBoard::EndGame()
 	SaveGameInstance->HighScores = HighScores;
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, "Save", 0);
 
-	screenText->GetTextRender()->SetText(FText::Format(LOCTEXT("txt","GAME OVER! Score: {0}\nPress \"E\" to Exit or \"R\" to Restart"), points));
+	screenText->GetTextRender()->SetText(FText::Format(FText::FromStringTable("StringTableCSV", "GameOver"), points));
 }
 
 void AC_TetrisBoard::SpawnPreviewTetromino()
@@ -262,7 +261,7 @@ void AC_TetrisBoard::Pause()
 		world->GetTimerManager().PauseTimer(dropTimerHandle);
 		world->GetTimerManager().PauseTimer(finaliseTimerHandle);
 		world->GetTimerManager().PauseTimer(prolongTimerHandle);
-		screenText->GetTextRender()->SetText(FText::Format(LOCTEXT("txt2", "PAUSED\nLEVEL:{0}"), level));
+		screenText->GetTextRender()->SetText(FText::Format(FText::FromStringTable("StringTableCSV", "Paused"), level));
 		paused = true;
 	}
 	else {
