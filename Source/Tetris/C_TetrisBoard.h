@@ -15,19 +15,6 @@ public:
 	// Sets default values for this actor's properties
 	AC_TetrisBoard();
 
-	virtual void SetupMyPlayerInputComponent(UInputComponent* myInputComponent);
-	virtual void MoveTetrominoLeft();
-	virtual void MoveTetrominoRight();
-	virtual void RotateTetromino();
-	virtual void TetrominoFinalise();
-	virtual void ProlongTimer();
-	virtual bool CheckPositions(TArray<int> positionsToCheck);
-	virtual void Pause();
-
-	int ClearLines();
-
-	virtual void ClearLine(int i);
-
 	UPROPERTY(EditAnywhere)
 		AActor* spawner;
 
@@ -40,6 +27,35 @@ public:
 	UPROPERTY(EditAnywhere)
 		ATextRenderActor* screenText;
 
+	
+	virtual bool CheckPositions(TArray<int> positionsToCheck);
+	
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	virtual void EndGame();
+
+private:
+	virtual void SetupMyPlayerInputComponent(UInputComponent* myInputComponent);
+	virtual void MoveTetrominoLeft();
+	virtual void MoveTetrominoRight();
+	virtual void RotateTetromino();
+	virtual void TetrominoFinalise();
+	virtual void ProlongTimer();
+	virtual void Pause();
+	int ClearLines();
+	virtual void ClearLine(int i);
+	virtual void SpawnTetromino();
+	virtual void MoveTetrominoDown();
+	virtual void SpawnPreviewTetromino();
+	virtual void DropTetromino();
+	virtual void LevelUp();
+	virtual void Restart();
+	virtual void Exit();
+
+
+	int level;
+	float dropSpeed;
 	bool paused;
 	bool isOver;
 	ABlock* placedPieces[10][15] = { {NULL} };
@@ -51,22 +67,6 @@ public:
 	FTimerHandle prolongTimerHandle;
 	UWorld* world;
 	int points = 0;
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void EndGame();
-
-private:
-	virtual void SpawnTetromino();
-	virtual void MoveTetrominoDown();
-	virtual void SpawnPreviewTetromino();
-	virtual void DropTetromino();
-	virtual void LevelUp();
-	virtual void Restart();
-	virtual void Exit();
-	int level;
-	float dropSpeed;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

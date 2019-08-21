@@ -83,7 +83,7 @@ void AC_TetrisBoard::SpawnPreviewTetromino()
 		FActorSpawnParameters params;
 		params.Owner = this;
 		previewTetromino = (world->SpawnActor<ATetromino>(ATetromino::StaticClass(), spawnLocation, rotator, params));
-		previewTetromino->Rotate();
+		previewTetromino->RotateAndPosition();
 		previewTetromino->SetBoard(nullptr);
 	}
 }
@@ -99,7 +99,7 @@ void AC_TetrisBoard::SpawnTetromino()
 		currentTetromino->SetPosition(spawnLocationIndex, 0);
 		currentTetromino->SetBoard(this);
 		currentTetromino->SetActorLocation(spawnLocation);
-		currentTetromino->Rotate();
+		currentTetromino->RotateAndPosition();
 		SpawnPreviewTetromino();
 		world->GetTimerManager().SetTimer(dropTimerHandle, this, &AC_TetrisBoard::MoveTetrominoDown, dropSpeed, true);
 	}
@@ -231,7 +231,7 @@ void AC_TetrisBoard::MoveTetrominoLeft()
 
 void AC_TetrisBoard::RotateTetromino()
 {
-	currentTetromino->Rotate();
+	currentTetromino->RotateAndPosition();
 	world->GetTimerManager().ClearTimer(finaliseTimerHandle);
 	world->GetTimerManager().SetTimer(prolongTimerHandle, this, &AC_TetrisBoard::ProlongTimer, 0.3f, false);
 }

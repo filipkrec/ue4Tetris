@@ -35,7 +35,7 @@ void ATetromino::GenerateTetromino()
 	}
 }
 
-void ATetromino::Rotate()
+void ATetromino::RotateAndPosition()
 {
 	if (rotation == 4)
 		rotation = 1;
@@ -64,7 +64,7 @@ void ATetromino::Rotate()
 		GenerateSquiglyReverse();
 		break;
 	}
-	SetBlocks();
+	SetBlockLocations();
 }
 
 TArray<int> ATetromino::GetBlockPositions()
@@ -129,13 +129,13 @@ bool ATetromino::Move(int columnsToMove, int rowsToMove)
 		location.X += 20 * columnsToMove;
 		location.Z -= 20 * rowsToMove;
 		SetActorLocation(location);
-		SetBlocks();
+		SetBlockLocations();
 		return true;
 	}
 	return false;
 }
 
-void ATetromino::SetBlocks()
+void ATetromino::SetBlockLocations()
 {
 	for (int i = 0; i < 4; ++i) {
 		blocks[i]->SetLocation(GetActorLocation());
@@ -255,11 +255,5 @@ TArray<ABlock*> ATetromino::GetBlocks() {
 	toReturn.Add(blocks[i]);
 
 	return toReturn;
-}
-
-// Called every frame
-void ATetromino::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 

@@ -16,7 +16,7 @@ public:
 	ATetromino();
 	virtual int GetCurrentRow();
 	virtual int GetCurrentColumn();
-	virtual void SetBoard(AC_TetrisBoard* fatherBoard);
+	virtual void SetBoard(AC_TetrisBoard* board);
 	virtual void SetPosition(int column, int row);
 	virtual TArray<int> GetBlockPositions();
 	virtual TArray<ABlock*> GetBlocks();
@@ -27,10 +27,10 @@ protected:
 private:
 
 	enum TetrominoType { block = 1, line = 2, T = 3, L = 4, LR = 5, squigly = 6, squiglyR = 7};
-	AC_TetrisBoard* board;
 	int currentRow;
 	int currentColumn;
 	int rotation;
+	AC_TetrisBoard* board;
 	TetrominoType type;
 	ABlock* blocks[4];
 	virtual bool SetBlockDifferences(TArray<int> newBlockPositions);
@@ -44,14 +44,11 @@ private:
 	virtual void GenerateSquiglyReverse();
 	virtual bool CheckBlocks(TArray<int> positionDifferences);
 	virtual bool CheckBlocksMove(int columnsToMove, int rowsToMove);
-	virtual void SetBlocks();
+	virtual void SetBlockLocations();
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	virtual bool Move(int columnsToMove, int rowsToMove);
-	virtual void Rotate();
+	virtual void RotateAndPosition();
 
 	ATetromino(const FObjectInitializer& ObjectInitializer);
 	UPROPERTY(VisibleAnywhere, Category = "Mesh") 
