@@ -1,0 +1,8 @@
+[[Requires C++ Game Development Tools in Visual Studio]]
+1. Follow https://docs.unrealengine.com/en-US/GettingStarted/Installation/index.html to install Unreal Engine
+2. Create a new empty c++ project in Unreal Engine (name it Tetris) 
+3. Place the Config,Content,Source files in the {{user}}/Documents/UnrealProjects/Tetris folder (replace existing files)
+4. Delete ".vs", Binaries, Intermediate, Saved folders 	from that same folder and delete the visual studio solution (Tetris.sln)
+5. Run Unreal Engine and open the Tetris project (Unreal Engine will rebuild the project automatically)
+6. Compile the project inside Unreal Engine
+7. Enjoy
