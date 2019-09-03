@@ -1,5 +1,5 @@
 Key,SourceString
-GameOver,"GAME OVER! Score: {0}\nPress """"E"""" to Exit or """"R"""" to Restart"
+GameOver,"GAME OVER! Score: {0}\nPress ""E"" to Exit or ""R"" to Restart"
 Paused,PAUSED\nLEVEL:{0}
 MainMenu,Main Menu
 Play,Play

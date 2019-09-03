@@ -52,7 +52,9 @@ private:
 	virtual void LevelUp();
 	virtual void Restart();
 	virtual void Exit();
-
+	virtual void StartMoveLeft();
+	virtual void StartMoveRight();
+	virtual void StopMove();
 
 	int level;
 	float dropSpeed;
@@ -65,6 +67,7 @@ private:
 	FTimerHandle dropTimerHandle;
 	FTimerHandle finaliseTimerHandle;
 	FTimerHandle prolongTimerHandle;
+	FTimerHandle moveTimerHandle;
 	UWorld* world;
 	int points = 0;
 public:	

@@ -196,6 +196,24 @@ bool AC_TetrisBoard::CheckPositions(TArray<int> positionsToCheck)
 	return true;
 }
 
+void AC_TetrisBoard::StartMoveLeft()
+{
+	MoveTetrominoLeft();
+	world->GetTimerManager().SetTimer(moveTimerHandle, this, &AC_TetrisBoard::MoveTetrominoLeft, 0.1F, true);
+}
+
+void AC_TetrisBoard::StartMoveRight()
+{
+	MoveTetrominoRight();
+	world->GetTimerManager().SetTimer(moveTimerHandle, this, &AC_TetrisBoard::MoveTetrominoRight, 0.1F, true);
+}
+
+void AC_TetrisBoard::StopMove()
+{
+	world->GetTimerManager().PauseTimer(moveTimerHandle);
+	world->GetTimerManager().ClearTimer(moveTimerHandle);
+}
+
 void AC_TetrisBoard::MoveTetrominoDown()
 {
 	if (currentTetromino->Move(0, 1) == false)
@@ -275,8 +293,10 @@ void AC_TetrisBoard::Pause()
 
 void AC_TetrisBoard::SetupMyPlayerInputComponent(UInputComponent* myInputComponent)
 {
-	myInputComponent->BindAction("LeftMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoLeft);
-	myInputComponent->BindAction("RightMove", IE_Pressed, this, &AC_TetrisBoard::MoveTetrominoRight);
+	myInputComponent->BindAction("LeftMove", IE_Pressed, this, &AC_TetrisBoard::StartMoveLeft);
+	myInputComponent->BindAction("LeftMove", IE_Released, this, &AC_TetrisBoard::StopMove);
+	myInputComponent->BindAction("RightMove", IE_Pressed, this, &AC_TetrisBoard::StartMoveRight);
+	myInputComponent->BindAction("RightMove", IE_Released, this, &AC_TetrisBoard::StopMove);
 	myInputComponent->BindAction("Rotate", IE_Pressed, this, &AC_TetrisBoard::RotateTetromino);
 	myInputComponent->BindAction("Drop", IE_Pressed, this, &AC_TetrisBoard::DropTetromino);
 	myInputComponent->BindAction("Restart", IE_Pressed, this, &AC_TetrisBoard::Restart);
